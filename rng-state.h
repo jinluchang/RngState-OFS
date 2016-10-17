@@ -273,8 +273,8 @@ inline void splitRngState(RngState& rs, const RngState& rs0, const std::string& 
   // the function should behave correctly even if ``rs'' is actually ``rs0''
 {
   std::string input = ssprintf("[%lu] {%s}", rs0.index, sindex.c_str());
-  computeHashWithInput(rs.hash, rs0, input);
   rs.numBytes = rs0.numBytes + 64 * ((32 + input.length() + 1 + 8 - 1) / 64 + 1);
+  computeHashWithInput(rs.hash, rs0, input);
   rs.index = 0;
   rs.cache[0] = 0;
   rs.cache[1] = 0;
