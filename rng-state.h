@@ -18,8 +18,13 @@
 
 #pragma once
 
-#include "sha256.h"
 #include "show.h"
+
+#ifndef USE_OPENSSL
+#include "sha256.h"
+#else
+#include <openssl/sha.h>
+#endif
 
 #include <stdint.h>
 #include <endian.h>
@@ -213,7 +218,6 @@ inline void reset(RngState& rs)
 {
   std::memset(&rs, 0, sizeof(RngState));
   rs.numBytes = 0;
-  sha256::setInitialHash(rs.hash);
   rs.hash[0] = 0;
   rs.hash[1] = 0;
   rs.hash[2] = 0;
@@ -247,7 +251,20 @@ inline void computeHashWithInput(uint32_t hash[8], const RngState& rs, const std
     data[i*4 + 3] =  rs.hash[i]        & 0xFF;
   }
   data += input;
+#ifndef USE_OPENSSL
   sha256::computeHash(hash, (const uint8_t*)data.c_str(), data.length());
+#else
+  {
+    uint8_t rawHash[32];
+    SHA256((unsigned char*)data.c_str(), data.length(), rawHash);
+    for (int i = 0; i < 8; ++i) {
+      hash[i] = (((uint32_t)rawHash[i*4 + 0]) << 24)
+              + (((uint32_t)rawHash[i*4 + 1]) << 16)
+              + (((uint32_t)rawHash[i*4 + 2]) <<  8)
+              + ( (uint32_t)rawHash[i*4 + 3]);
+    }
+  }
+#endif
 }
 
 inline void splitRngState(RngState& rs, const RngState& rs0, const std::string& sindex)
