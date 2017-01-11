@@ -37,9 +37,9 @@
 #include <istream>
 #include <vector>
 
-#ifdef CURRENT_DEFAULT_NAMESPACE_NAME
-namespace CURRENT_DEFAULT_NAMESPACE_NAME {
-#endif
+namespace qrngstate {
+
+using namespace qshow;
 
 struct RngState;
 
@@ -418,6 +418,8 @@ inline RngState& get_global_rng_state()
   return getGlobalRngState();
 }
 
-#ifdef CURRENT_DEFAULT_NAMESPACE_NAME
 }
+
+#ifndef USE_NAMESPACE
+using namespace qrngstate;
 #endif
